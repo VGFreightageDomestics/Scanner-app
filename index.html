@@ -1,481 +1,533 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VG Cargo Scanner</title>
-    
-    <!-- Mobile App Meta -->
-    <meta name="theme-color" content="#001f60">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    
-    <!-- CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
-    
-    <style>
-        body { font-family: 'Roboto', sans-serif; background-color: #f0f2f5; user-select: none; }
-        
-        /* APP HEADER */
-        .app-header {
-            background: #001f60; color: white; padding: 15px;
-            display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-        
-        /* LOGIN SCREEN */
-        .login-wrapper {
-            height: 100vh; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; padding: 30px;
-            background: linear-gradient(135deg, #001f60 0%, #000c24 100%); color: white;
-        }
-        
-        /* DASHBOARD GRID */
-        .menu-grid { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .menu-btn {
-            background: white; border-radius: 15px; padding: 30px 10px;
-            text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            border: none; width: 100%; transition: 0.2s;
-        }
-        .menu-btn:active { transform: scale(0.95); background: #eef; }
-        .menu-icon { font-size: 2.5rem; color: #001f60; margin-bottom: 10px; }
-        .menu-text { font-weight: 700; color: #333; font-size: 1rem; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VG Cargo Scanner</title>
 
-        /* SCANNER UI */
-        #reader { width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
-        
-        /* RESULT CARD */
-        .action-sheet {
-            background: white; border-radius: 20px 20px 0 0;
-            padding: 25px; position: fixed; bottom: 0; left: 0; right: 0;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1); transform: translateY(100%);
-            transition: 0.3s; z-index: 2000;
-        }
-        .action-sheet.show { transform: translateY(0); }
-        
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 1500; display: none;
-        }
+  <meta name="theme-color" content="#001f60">
+  <meta name="apple-mobile-web-app-capable" content="yes">
 
-        .btn-update {
-            background: #00c853; color: white; font-weight: bold;
-            padding: 15px; border-radius: 50px; width: 100%; border: none;
-            font-size: 1.1rem; box-shadow: 0 5px 15px rgba(0,200,83,0.3);
-        }
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
 
-        /* HIDDEN UTILS */
-        .hidden { display: none !important; }
-        .page-section { padding-bottom: 80px; }
-    </style>
+  <style>
+    body { font-family: 'Roboto', sans-serif; background-color: #f0f2f5; user-select: none; }
+
+    .app-header{
+      background:#001f60; color:#fff; padding:15px;
+      display:flex; justify-content:space-between; align-items:center;
+      position:sticky; top:0; z-index:1000; box-shadow:0 2px 10px rgba(0,0,0,.2);
+    }
+
+    .login-wrapper{
+      height:100vh; display:flex; flex-direction:column;
+      justify-content:center; align-items:center; padding:30px;
+      background:linear-gradient(135deg,#001f60 0%,#000c24 100%); color:#fff;
+    }
+
+    .menu-grid{ padding:20px; display:grid; grid-template-columns:1fr 1fr; gap:15px; }
+    .menu-btn{
+      background:#fff; border-radius:15px; padding:30px 10px; text-align:center;
+      box-shadow:0 4px 10px rgba(0,0,0,.05); border:none; width:100%; transition:.2s;
+    }
+    .menu-btn:active{ transform:scale(.95); background:#eef; }
+    .menu-icon{ font-size:2.5rem; color:#001f60; margin-bottom:10px; }
+    .menu-text{ font-weight:700; color:#333; font-size:1rem; }
+
+    #reader{ width:100%; border-radius:10px; overflow:hidden; margin-bottom:20px; min-height: 280px; background:#0b1220; }
+
+    .action-sheet{
+      background:#fff; border-radius:20px 20px 0 0; padding:25px;
+      position:fixed; bottom:0; left:0; right:0; z-index:2000;
+      box-shadow:0 -5px 20px rgba(0,0,0,.1);
+      transform:translateY(110%); transition:.3s;
+      max-height:80vh; overflow:auto;
+    }
+    .action-sheet.show{ transform:translateY(0); }
+
+    .overlay{
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,.5); z-index:1500; display:none;
+    }
+
+    .btn-update{
+      background:#00c853; color:#fff; font-weight:bold;
+      padding:15px; border-radius:50px; width:100%; border:none;
+      font-size:1.1rem; box-shadow:0 5px 15px rgba(0,200,83,.3);
+    }
+
+    .hidden{ display:none !important; }
+    .page-section{ padding-bottom:80px; }
+    .mini-note{ font-size:.8rem; color:#6c757d; margin-top:6px; }
+  </style>
 </head>
 <body>
 
-    <!-- 1. LOGIN SCREEN -->
-    <div id="viewLogin" class="login-wrapper">
-        <div class="text-center">
-            <i class="fas fa-shipping-fast fa-4x mb-3 text-warning"></i>
-            <h2 class="fw-bold">VG FREIGHTAGE</h2>
-            <p class="opacity-75">Staff Scanner App</p>
-        </div>
-        <div class="w-100 mt-4">
-            <input type="email" id="email" class="form-control form-control-lg mb-3" placeholder="Staff Email">
-            <input type="password" id="pass" class="form-control form-control-lg mb-4" placeholder="Password">
-            <button class="btn btn-warning w-100 btn-lg fw-bold" onclick="login()">SECURE LOGIN</button>
-        </div>
+  <!-- LOGIN -->
+  <div id="viewLogin" class="login-wrapper">
+    <div class="text-center">
+      <i class="fas fa-shipping-fast fa-4x mb-3 text-warning"></i>
+      <h2 class="fw-bold">VG FREIGHTAGE</h2>
+      <p class="opacity-75">Staff Scanner App</p>
+    </div>
+    <div class="w-100 mt-4">
+      <input type="email" id="email" class="form-control form-control-lg mb-3" placeholder="Staff Email">
+      <input type="password" id="pass" class="form-control form-control-lg mb-4" placeholder="Password">
+      <button class="btn btn-warning w-100 btn-lg fw-bold" onclick="login()">SECURE LOGIN</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="viewMain" class="hidden">
+    <div class="app-header">
+      <div class="fw-bold"><i class="fas fa-box me-2"></i> VG CARGO</div>
+      <button class="btn btn-sm btn-outline-light" onclick="logout()">LOGOUT</button>
     </div>
 
-    <!-- MAIN APP CONTAINER -->
-    <div id="viewMain" class="hidden">
-        
-        <!-- HEADER -->
-        <div class="app-header">
-            <div class="fw-bold"><i class="fas fa-box me-2"></i> VG CARGO</div>
-            <button class="btn btn-sm btn-outline-light" onclick="logout()">LOGOUT</button>
-        </div>
-
-        <!-- 2. DASHBOARD MENU -->
-        <div id="tabMenu" class="page-section">
-            <div class="p-3">
-                <h5 class="fw-bold text-muted">Welcome, <span id="userDisp">User</span></h5>
-            </div>
-            <div class="menu-grid">
-                <button class="menu-btn" onclick="openScanner()">
-                    <div class="menu-icon"><i class="fas fa-qrcode"></i></div>
-                    <div class="menu-text">SCAN QR</div>
-                </button>
-                <button class="menu-btn" onclick="openTracker()">
-                    <div class="menu-icon"><i class="fas fa-search"></i></div>
-                    <div class="menu-text">TRACK</div>
-                </button>
-            </div>
-        </div>
-
-        <!-- 3. SCANNER SECTION -->
-        <div id="tabScanner" class="page-section hidden p-3">
-            <button class="btn btn-secondary mb-3" onclick="closeScanner()"><i class="fas fa-arrow-left"></i> Back</button>
-            <h4 class="fw-bold mb-3">Scan Waybill</h4>
-            
-            <div class="d-grid gap-2 mb-2">
-  <button id="btnCamStart" class="btn btn-primary btn-lg" onclick="requestCamAndStart()">
-    <i class="fas fa-camera me-2"></i> Enable Camera / Start Scan
-  </button>
-  <button id="btnCamStop" class="btn btn-outline-danger" onclick="stopScan()" style="display:none;">
-    <i class="fas fa-stop me-2"></i> Stop Camera
-  </button>
-</div>
-
-<div id="camMsg" class="small text-danger mb-2"></div>
-
-<div id="reader"></div>
-<p class="text-center text-muted small">Point camera at QR Code</p>
-
-        </div>
-
-        <!-- 4. TRACKER SECTION -->
-        <div id="tabTracker" class="page-section hidden p-3">
-            <button class="btn btn-secondary mb-3" onclick="closeTracker()"><i class="fas fa-arrow-left"></i> Back</button>
-            <h4 class="fw-bold mb-3">Track Shipment</h4>
-            <div class="input-group mb-3">
-                <input type="text" id="trackInput" class="form-control form-control-lg" placeholder="VG-XXXXXX">
-                <button class="btn btn-primary" onclick="trackItem()">SEARCH</button>
-            </div>
-            <div id="trackResult"></div>
-        </div>
-
+    <!-- MENU -->
+    <div id="tabMenu" class="page-section">
+      <div class="p-3">
+        <h5 class="fw-bold text-muted">Welcome, <span id="userDisp">User</span></h5>
+      </div>
+      <div class="menu-grid">
+        <button class="menu-btn" onclick="openScanner()">
+          <div class="menu-icon"><i class="fas fa-qrcode"></i></div>
+          <div class="menu-text">SCAN QR</div>
+        </button>
+        <button class="menu-btn" onclick="openTracker()">
+          <div class="menu-icon"><i class="fas fa-search"></i></div>
+          <div class="menu-text">TRACK</div>
+        </button>
+      </div>
     </div>
 
-    <!-- UPDATE SHEET (POPUP) -->
-    <div class="overlay" id="overlay" onclick="closeSheet()"></div>
-    <div class="action-sheet" id="actionSheet">
-        <div class="text-center mb-3">
-            <div style="width:50px; height:5px; background:#ddd; margin:0 auto; border-radius:10px;"></div>
-        </div>
-        <h3 class="fw-bold text-primary" id="detectedCode">...</h3>
-        <p class="text-muted small">Select new status for this package</p>
-        
-        <div class="mb-3">
-            <label class="fw-bold small">STATUS</label>
-            <select id="newStatus" class="form-select form-select-lg">
-                <option>Picked Up (Origin)</option>
-                <option>Departed Origin</option>
-                <option>In Transit</option>
-                <option>Arrived at Hub</option>
-                <option>Out for Delivery</option>
-                <option>Delivered</option>
-            </select>
-        </div>
+    <!-- SCANNER -->
+    <div id="tabScanner" class="page-section hidden p-3">
+      <button class="btn btn-secondary mb-3" onclick="closeScanner()"><i class="fas fa-arrow-left"></i> Back</button>
+      <h4 class="fw-bold mb-3">Scan Waybill</h4>
 
-        <div class="mb-4">
-            <label class="fw-bold small">LOCATION</label>
-            <select id="locSelect" class="form-select form-select-lg" onchange="checkCustom()">
-                <option disabled selected>Loading hubs...</option>
-            </select>
-            <input type="text" id="locCustom" class="form-control mt-2 hidden" placeholder="Enter Custom Location">
-        </div>
+      <div class="d-grid gap-2 mb-2">
+        <button id="btnCamStart" class="btn btn-primary btn-lg" onclick="requestCamAndStart()">
+          <i class="fas fa-camera me-2"></i> Enable Camera / Start Scan
+        </button>
+        <button id="btnCamStop" class="btn btn-outline-danger" onclick="stopScan()" style="display:none;">
+          <i class="fas fa-stop me-2"></i> Stop Camera
+        </button>
+      </div>
 
-        <button class="btn-update" onclick="submitUpdate()">UPDATE STATUS</button>
+      <div id="camMsg" class="small text-danger mb-2"></div>
+
+      <div id="reader"></div>
+      <p class="text-center text-muted small">Tip: If opened inside Facebook/Messenger browser, tap menu → <b>Open in Chrome</b>.</p>
     </div>
 
-    <!-- SCRIPTS -->
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, arrayUnion, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    <!-- TRACKER -->
+    <div id="tabTracker" class="page-section hidden p-3">
+      <button class="btn btn-secondary mb-3" onclick="closeTracker()"><i class="fas fa-arrow-left"></i> Back</button>
+      <h4 class="fw-bold mb-3">Track Shipment</h4>
 
-        // *** PASTE YOUR FIREBASE CONFIG HERE ***
-        const firebaseConfig = {
-            apiKey: "AIzaSyCrDEUr1O5krXFHEB2hafLXuEumEcoSTxM",
-            authDomain: "vg-cargo-system-3.firebaseapp.com",
-            projectId: "vg-cargo-system-3",
-            storageBucket: "vg-cargo-system-3.firebasestorage.app",
-            messagingSenderId: "819520192535",
-            appId: "1:819520192535:web:8e42b272500f9b60e19c52"
-        };
+      <div class="input-group mb-3">
+        <input type="text" id="trackInput" class="form-control form-control-lg" placeholder="VG-XXXXXX">
+        <button class="btn btn-primary" onclick="trackItem()">SEARCH</button>
+      </div>
+      <div id="trackResult"></div>
+    </div>
+  </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        let scanner = null;
+  <!-- UPDATE SHEET -->
+  <div class="overlay" id="overlay" onclick="closeSheet()"></div>
+  <div class="action-sheet" id="actionSheet">
+    <div class="text-center mb-3">
+      <div style="width:50px; height:5px; background:#ddd; margin:0 auto; border-radius:10px;"></div>
+    </div>
 
-        // AUTH
-        window.login = async () => {
-            try {
-                await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value);
-            } catch(e) { alert("Login failed: " + e.message); }
-        };
-        window.logout = () => signOut(auth);
+    <h3 class="fw-bold text-primary" id="detectedCode">...</h3>
+    <p class="text-muted small mb-3">Select status, location, and destination</p>
 
-        onAuthStateChanged(auth, (user) => {
-            if(user) {
-                document.getElementById('viewLogin').classList.add('hidden');
-                document.getElementById('viewMain').classList.remove('hidden');
-                document.getElementById('userDisp').innerText = user.email.split('@')[0];
-                loadLocations();
-            } else {
-                document.getElementById('viewLogin').classList.remove('hidden');
-                document.getElementById('viewMain').classList.add('hidden');
-            }
-        });
+    <div class="mb-3">
+      <label class="fw-bold small">STATUS</label>
+      <select id="newStatus" class="form-select form-select-lg">
+        <option value="PICKED_UP">Picked Up</option>
+        <option value="DEPARTED_ORIGIN">Departed Origin</option>
+        <option value="IN_TRANSIT">In Transit</option>
+        <option value="ARRIVED_DESTINATION">Arrived Destination</option>
+        <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
+        <option value="DELIVERED">Delivered</option>
+      </select>
+    </div>
 
-        // NAVIGATION
-window.openScanner = () => {
-  document.getElementById('tabMenu').classList.add('hidden');
-  document.getElementById('tabScanner').classList.remove('hidden');
+    <div class="mb-3">
+      <label class="fw-bold small">LOCATION</label>
+      <select id="locSelect" class="form-select form-select-lg" onchange="checkCustomLoc()">
+        <option disabled selected>Loading hubs...</option>
+      </select>
+      <input type="text" id="locCustom" class="form-control mt-2 hidden" placeholder="Enter Custom Location">
+    </div>
 
-  // IMPORTANT: do NOT auto-start camera here.
-  // User must click the button to request permission.
-  document.getElementById('camMsg').textContent = '';
-};
+    <div class="mb-4">
+      <label class="fw-bold small">DESTINATION</label>
+      <select id="destSelect" class="form-select form-select-lg" onchange="checkCustomDest()">
+        <option disabled selected>Loading destinations...</option>
+      </select>
+      <input type="text" id="destCustom" class="form-control mt-2 hidden" placeholder="Enter New Destination (City/Area)">
+      <div class="mini-note">Destination list auto-updates when you add new.</div>
+    </div>
 
-window.closeScanner = async () => {
-  document.getElementById('tabMenu').classList.remove('hidden');
-  document.getElementById('tabScanner').classList.add('hidden');
-  await stopScan();
-};
+    <button class="btn-update" onclick="submitUpdate()">UPDATE STATUS</button>
+  </div>
 
-// CAMERA PERMISSION + START
-window.requestCamAndStart = async () => {
-  const msg = document.getElementById('camMsg');
-  msg.textContent = '';
+  <!-- LIB -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
-  try {
-    // Force permission prompt via user click
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: "environment" } },
-      audio: false
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrDEUr1O5krXFHEB2hafLXuEumEcoSTxM",
+      authDomain: "vg-cargo-system-3.firebaseapp.com",
+      projectId: "vg-cargo-system-3",
+      storageBucket: "vg-cargo-system-3.firebasestorage.app",
+      messagingSenderId: "819520192535",
+      appId: "1:819520192535:web:8e42b272500f9b60e19c52"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let scanner = null; // Html5Qrcode instance
+
+    // AUTH
+    window.login = async () => {
+      try{
+        await signInWithEmailAndPassword(auth,
+          document.getElementById('email').value,
+          document.getElementById('pass').value
+        );
+      }catch(e){
+        alert("Login failed: " + e.message);
+      }
+    };
+    window.logout = () => signOut(auth);
+
+    onAuthStateChanged(auth, (user) => {
+      if(user){
+        document.getElementById('viewLogin').classList.add('hidden');
+        document.getElementById('viewMain').classList.remove('hidden');
+        document.getElementById('userDisp').innerText = user.email.split('@')[0];
+
+        loadLocations();
+        loadDestinations();
+      }else{
+        document.getElementById('viewLogin').classList.remove('hidden');
+        document.getElementById('viewMain').classList.add('hidden');
+      }
     });
 
-    // Stop this “probe” stream immediately (scanner will open its own)
-    stream.getTracks().forEach(t => t.stop());
+    // NAV
+    window.openScanner = () => {
+      document.getElementById('tabMenu').classList.add('hidden');
+      document.getElementById('tabScanner').classList.remove('hidden');
+      document.getElementById('camMsg').textContent = '';
+      // DO NOT auto-start camera (permission must be user-gesture)
+    };
 
-    await startScan();
-  } catch (e) {
-    // Common errors: NotAllowedError, NotFoundError, NotReadableError
-    const name = e?.name || 'CameraError';
-    let hint = '';
+    window.closeScanner = async () => {
+      document.getElementById('tabMenu').classList.remove('hidden');
+      document.getElementById('tabScanner').classList.add('hidden');
+      await stopScan();
+      closeSheet();
+    };
 
-    if (name === 'NotAllowedError' || name === 'SecurityError') {
-      hint = 'Camera permission denied. Please allow camera in Site Settings.';
-    } else if (name === 'NotFoundError') {
-      hint = 'No camera found on this device.';
-    } else if (name === 'NotReadableError') {
-      hint = 'Camera is in use by another app. Close other apps using the camera.';
-    } else {
-      hint = 'Camera blocked. If you opened this inside Facebook/Messenger, try opening in Chrome.';
+    window.openTracker = () => {
+      document.getElementById('tabMenu').classList.add('hidden');
+      document.getElementById('tabTracker').classList.remove('hidden');
+    };
+
+    window.closeTracker = () => {
+      document.getElementById('tabMenu').classList.remove('hidden');
+      document.getElementById('tabTracker').classList.add('hidden');
+    };
+
+    // SHEET
+    window.closeSheet = () => {
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('actionSheet').classList.remove('show');
+    };
+
+    // CUSTOM toggle
+    window.checkCustomLoc = () => {
+      const v = document.getElementById('locSelect').value;
+      document.getElementById('locCustom').classList.toggle('hidden', v !== '__OTHER__');
+    };
+    window.checkCustomDest = () => {
+      const v = document.getElementById('destSelect').value;
+      document.getElementById('destCustom').classList.toggle('hidden', v !== '__OTHER__');
+    };
+
+    // CAMERA PERMISSION + START
+    window.requestCamAndStart = async () => {
+      const msg = document.getElementById('camMsg');
+      msg.textContent = '';
+
+      try{
+        // permission prompt via user click
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" } },
+          audio: false
+        });
+        stream.getTracks().forEach(t => t.stop());
+        await startScan();
+      }catch(e){
+        const name = e?.name || 'CameraError';
+        let hint = '';
+
+        if(name === 'NotAllowedError' || name === 'SecurityError'){
+          hint = 'Camera permission denied. Allow camera in Site Settings.';
+        }else if(name === 'NotFoundError'){
+          hint = 'No camera found on this device.';
+        }else if(name === 'NotReadableError'){
+          hint = 'Camera is in use by another app. Close other apps using the camera.';
+        }else{
+          hint = 'Camera blocked. If opened in Facebook/Messenger, open in Chrome.';
+        }
+        msg.textContent = `${hint} (${name})`;
+        console.error(e);
+      }
+    };
+
+    async function startScan(){
+      const msg = document.getElementById('camMsg');
+      msg.textContent = '';
+
+      await stopScan();
+
+      const { Html5Qrcode } = window;
+      if(!Html5Qrcode){
+        msg.textContent = 'Scanner library not loaded. Check internet/ad-block.';
+        return;
+      }
+
+      const qr = new Html5Qrcode("reader");
+      scanner = qr;
+
+      document.getElementById('btnCamStart').style.display = 'none';
+      document.getElementById('btnCamStop').style.display = 'block';
+
+      let camId = null;
+      try{
+        const cams = await Html5Qrcode.getCameras();
+        if(cams && cams.length){
+          camId = cams[cams.length - 1].id; // usually back cam
+        }
+      }catch(e){}
+
+      const config = { fps: 10, qrbox: 250, disableFlip: true };
+
+      try{
+        if(camId){
+          await qr.start(camId, config, (txt)=>onScanSuccess(txt), ()=>{});
+        }else{
+          await qr.start({ facingMode: { ideal: "environment" } }, config, (txt)=>onScanSuccess(txt), ()=>{});
+        }
+      }catch(e){
+        const name = e?.name || 'StartError';
+        msg.textContent = `Unable to start camera. Use HTTPS/Chrome and allow permission. (${name})`;
+        console.error(e);
+
+        document.getElementById('btnCamStart').style.display = 'block';
+        document.getElementById('btnCamStop').style.display = 'none';
+      }
     }
 
-    msg.textContent = `${hint} (${name})`;
-    console.error(e);
-  }
-};
+    window.stopScan = async () => {
+      if(scanner){
+        try{ await scanner.stop(); }catch(e){}
+        try{ await scanner.clear(); }catch(e){}
+        scanner = null;
+      }
+      const msg = document.getElementById('camMsg');
+      if(msg) msg.textContent = '';
 
-async function startScan(){
-  const msg = document.getElementById('camMsg');
-  msg.textContent = '';
+      const startBtn = document.getElementById('btnCamStart');
+      const stopBtn  = document.getElementById('btnCamStop');
+      if(startBtn) startBtn.style.display = 'block';
+      if(stopBtn) stopBtn.style.display = 'none';
+    };
 
-  // Clean previous instance
-  await stopScan();
+    function onScanSuccess(decodedText){
+      const txt = String(decodedText || '').trim();
+      if(!txt) return;
 
-  // Use Html5Qrcode (more control than Html5QrcodeScanner)
-  const { Html5Qrcode } = window;
-  if (!Html5Qrcode) {
-    msg.textContent = 'Scanner library not loaded. Check internet/ad-block.';
-    return;
-  }
+      // anti-double trigger
+      if(window.__lastScan === txt && (Date.now() - (window.__lastScanAt||0)) < 1200) return;
+      window.__lastScan = txt;
+      window.__lastScanAt = Date.now();
 
-  const qr = new Html5Qrcode("reader");
-  scanner = qr;
+      document.getElementById('detectedCode').innerText = txt;
 
-  document.getElementById('btnCamStart').style.display = 'none';
-  document.getElementById('btnCamStop').style.display = 'block';
+      // reset custom fields
+      document.getElementById('locCustom').value = '';
+      document.getElementById('destCustom').value = '';
+      document.getElementById('locCustom').classList.add('hidden');
+      document.getElementById('destCustom').classList.add('hidden');
 
-  // Try back camera first
-  let camId = null;
-  try {
-    const cams = await Html5Qrcode.getCameras();
-    if (cams && cams.length) {
-      // Choose the last camera often = back camera on many phones
-      camId = cams[cams.length - 1].id;
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('actionSheet').classList.add('show');
     }
-  } catch(e) {
-    // Ignore, will fallback to constraints
-  }
 
-  const config = { fps: 10, qrbox: 250, disableFlip: true };
+    // UPDATE
+    window.submitUpdate = async () => {
+      const wb = (document.getElementById('detectedCode').innerText || '').trim();
+      const status = document.getElementById('newStatus').value;
 
-  try {
-    if (camId) {
-      await qr.start(
-        camId,
-        config,
-        (decodedText) => onScanSuccess(decodedText),
-        () => {} // ignore scan failure
-      );
-    } else {
-      // Fallback: constraints
-      await qr.start(
-        { facingMode: { ideal: "environment" } },
-        config,
-        (decodedText) => onScanSuccess(decodedText),
-        () => {}
-      );
-    }
-  } catch (e) {
-    const name = e?.name || 'StartError';
-    msg.textContent = `Unable to start camera. Try Chrome, HTTPS, and allow permission. (${name})`;
-    console.error(e);
+      let loc = document.getElementById('locSelect').value;
+      let dest = document.getElementById('destSelect').value;
 
-    document.getElementById('btnCamStart').style.display = 'block';
-    document.getElementById('btnCamStop').style.display = 'none';
-  }
-}
+      let isCustomLoc = false;
+      let isCustomDest = false;
 
-window.stopScan = async () => {
-  if(scanner){
-    try{
-      // Html5Qrcode stop/clear
-      await scanner.stop();
-    }catch(e){}
-    try{
-      await scanner.clear();
-    }catch(e){}
-    scanner = null;
-  }
-  const msg = document.getElementById('camMsg');
-  if (msg) msg.textContent = '';
+      if(loc === '__OTHER__'){
+        loc = (document.getElementById('locCustom').value || '').trim();
+        isCustomLoc = true;
+      }
+      if(dest === '__OTHER__'){
+        dest = (document.getElementById('destCustom').value || '').trim();
+        isCustomDest = true;
+      }
 
-  const startBtn = document.getElementById('btnCamStart');
-  const stopBtn  = document.getElementById('btnCamStop');
-  if (startBtn) startBtn.style.display = 'block';
-  if (stopBtn) stopBtn.style.display = 'none';
-};
+      if(!wb) return alert("No waybill detected.");
+      if(!status) return alert("Select status.");
+      if(!loc) return alert("Select location.");
+      if(!dest) return alert("Select destination.");
 
-// Update onScanSuccess for Html5Qrcode (no pause/resume)
-function onScanSuccess(decodedText){
-  // Prevent rapid double trigger
-  if(window.__lastScan === decodedText && (Date.now() - (window.__lastScanAt||0)) < 1500) return;
-  window.__lastScan = decodedText;
-  window.__lastScanAt = Date.now();
+      const btn = document.querySelector('.btn-update');
+      btn.innerText = "UPDATING...";
+      btn.disabled = true;
 
-  document.getElementById('detectedCode').innerText = decodedText;
+      try{
+        const nowStr = new Date().toLocaleString();
 
-  // show sheet
-  document.getElementById('locCustom').value = '';
-  document.getElementById('destCustom').value = '';
-  document.getElementById('locCustom').classList.add('hidden');
-  document.getElementById('destCustom').classList.add('hidden');
+        // SAFE: creates doc if missing, merges if existing
+        await setDoc(doc(db, "parcels", wb), {
+          waybill: wb,
+          currentStatus: status,
+          currentLocation: loc,
+          currentDestination: dest,
+          updatedAt: nowStr,
+          history: arrayUnion({
+            status, location: loc, destination: dest,
+            time: nowStr,
+            user: auth.currentUser?.email || ''
+          })
+        }, { merge: true });
 
-  document.getElementById('overlay').style.display = 'block';
-  document.getElementById('actionSheet').classList.add('show');
-}
-
-
-        // UPDATE LOGIC
-        window.checkCustom = () => {
-            const val = document.getElementById('locSelect').value;
-            if(val === 'Other') document.getElementById('locCustom').classList.remove('hidden');
-            else document.getElementById('locCustom').classList.add('hidden');
-        };
-
-        window.submitUpdate = async () => {
-            const wb = document.getElementById('detectedCode').innerText;
-            const status = document.getElementById('newStatus').value;
-            let loc = document.getElementById('locSelect').value;
-            let isCustom = false;
-
-            if(loc === 'Other') {
-                loc = document.getElementById('locCustom').value.trim();
-                isCustom = true;
-            }
-
-            if(!wb || !status || !loc) return alert("Please fill details");
-
-            const btn = document.querySelector('.btn-update');
-            btn.innerText = "UPDATING...";
-            btn.disabled = true;
-
-            try {
-                // Update Parcel
-                await updateDoc(doc(db, "parcels", wb), {
-                    currentStatus: status,
-                    history: arrayUnion({
-                        status: status,
-                        location: loc,
-                        time: new Date().toLocaleString(),
-                        user: auth.currentUser.email
-                    })
-                });
-
-                // Save Custom Loc
-                if(isCustom) {
-                    await setDoc(doc(db, "settings", "locations"), {
-                        list: arrayUnion(loc)
-                    }, { merge: true });
-                }
-
-                alert("Success!");
-                window.closeSheet();
-            } catch(e) {
-                alert("Error: " + e.message);
-            }
-            
-            btn.innerText = "UPDATE STATUS";
-            btn.disabled = false;
-        };
-
-        // LOAD LOCATIONS (Dynamic)
-        function loadLocations() {
-            onSnapshot(doc(db, "settings", "locations"), (s) => {
-                const sel = document.getElementById('locSelect');
-                let list = ["MNL HUB", "CEB HUB", "DVO HUB", "Rider"]; // Default
-                if(s.exists() && s.data().list) list = s.data().list;
-                
-                let opts = list.sort().map(l => `<option value="${l}">${l}</option>`).join('');
-                opts += `<option value="Other">+ New Location</option>`;
-                sel.innerHTML = opts;
-            });
+        // Save custom lists
+        if(isCustomLoc){
+          await setDoc(doc(db, "settings", "locations"), { list: arrayUnion(loc) }, { merge:true });
+        }
+        if(isCustomDest){
+          await setDoc(doc(db, "settings", "destinations"), { list: arrayUnion(dest) }, { merge:true });
         }
 
-        // TRACKER LOGIC
-        window.trackItem = async () => {
-            const wb = document.getElementById('trackInput').value.trim().toUpperCase();
-            const res = document.getElementById('trackResult');
-            res.innerHTML = "Searching...";
-            
-            try {
-                const d = await getDoc(doc(db, "parcels", wb));
-                if(d.exists()) {
-                    const data = d.data();
-                    let hist = data.history.reverse().map(h => 
-                        `<div class="border-start border-3 border-primary ps-3 mb-3">
-                            <div class="fw-bold">${h.status}</div>
-                            <div class="small text-muted">${h.location}</div>
-                            <div style="font-size:0.7rem">${h.time}</div>
-                        </div>`
-                    ).join('');
-                    
-                    res.innerHTML = `
-                        <div class="card p-3 shadow-sm mt-3">
-                            <h3 class="fw-bold text-primary">${data.waybill}</h3>
-                            <div class="badge bg-warning text-dark mb-3 w-50">${data.currentStatus}</div>
-                            <div class="row small mb-3">
-                                <div class="col-6"><strong>FROM:</strong><br>${data.shipper.name}</div>
-                                <div class="col-6"><strong>TO:</strong><br>${data.consignee.name}</div>
-                            </div>
-                            <hr>
-                            <h6 class="fw-bold">History</h6>
-                            ${hist}
-                        </div>
-                    `;
-                } else {
-                    res.innerHTML = "<div class='alert alert-danger'>Not found</div>";
-                }
-            } catch(e) { res.innerHTML = "Error"; }
-        };
-    </script>
-</body>
+        alert("Success!");
+        closeSheet();
+      }catch(e){
+        alert("Error: " + e.message);
+        console.error(e);
+      }
 
+      btn.innerText = "UPDATE STATUS";
+      btn.disabled = false;
+    };
+
+    // LOAD LOCATIONS
+    function loadLocations(){
+      onSnapshot(doc(db, "settings", "locations"), (s) => {
+        const sel = document.getElementById('locSelect');
+        let list = ["MNL HUB", "CEB HUB", "DVO HUB", "Rider"];
+        if(s.exists() && Array.isArray(s.data().list)) list = s.data().list;
+
+        const clean = (list||[]).map(x=>String(x||'').trim()).filter(Boolean);
+        let opts = clean.sort((a,b)=>a.localeCompare(b))
+          .map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+        opts += `<option value="__OTHER__">+ New Location</option>`;
+        sel.innerHTML = opts || `<option value="__OTHER__">+ New Location</option>`;
+      });
+    }
+
+    // LOAD DESTINATIONS
+    function loadDestinations(){
+      onSnapshot(doc(db, "settings", "destinations"), (s) => {
+        const sel = document.getElementById('destSelect');
+        let list = ["MANILA", "CEBU", "DAVAO", "ILOILO", "BACOLOD"];
+        if(s.exists() && Array.isArray(s.data().list)) list = s.data().list;
+
+        const clean = (list||[]).map(x=>String(x||'').trim()).filter(Boolean);
+        let opts = clean.sort((a,b)=>a.localeCompare(b))
+          .map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+        opts += `<option value="__OTHER__">+ New Destination</option>`;
+        sel.innerHTML = opts || `<option value="__OTHER__">+ New Destination</option>`;
+      });
+    }
+
+    // TRACK
+    window.trackItem = async () => {
+      const wb = (document.getElementById('trackInput').value || '').trim().toUpperCase();
+      const res = document.getElementById('trackResult');
+      if(!wb){ res.innerHTML = "<div class='alert alert-warning'>Enter waybill.</div>"; return; }
+
+      res.innerHTML = "Searching...";
+      try{
+        const d = await getDoc(doc(db, "parcels", wb));
+        if(!d.exists()){
+          res.innerHTML = "<div class='alert alert-danger'>Not found</div>";
+          return;
+        }
+
+        const data = d.data() || {};
+        const histArr = Array.isArray(data.history) ? [...data.history] : [];
+        histArr.reverse();
+
+        const hist = histArr.map(h => `
+          <div class="border-start border-3 border-primary ps-3 mb-3">
+            <div class="fw-bold">${esc(h.status || '')}</div>
+            <div class="small text-muted">${esc(h.location || '')}${h.destination ? ' • ' + esc(h.destination) : ''}</div>
+            <div style="font-size:0.7rem">${esc(h.time || '')}</div>
+          </div>
+        `).join('') || `<div class="text-muted small">No history yet.</div>`;
+
+        res.innerHTML = `
+          <div class="card p-3 shadow-sm mt-3">
+            <h3 class="fw-bold text-primary">${esc(data.waybill || wb)}</h3>
+            <div class="badge bg-warning text-dark mb-2">${esc(data.currentStatus || '')}</div>
+            <div class="small text-muted mb-3">
+              <div><strong>Location:</strong> ${esc(data.currentLocation || '-')}</div>
+              <div><strong>Destination:</strong> ${esc(data.currentDestination || '-')}</div>
+            </div>
+            <hr>
+            <h6 class="fw-bold">History</h6>
+            ${hist}
+          </div>
+        `;
+      }catch(e){
+        console.error(e);
+        res.innerHTML = "<div class='alert alert-danger'>Error loading record</div>";
+      }
+    };
+
+    function esc(s){
+      return String(s||'')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'","&#039;");
+    }
+  </script>
+</body>
 </html>
