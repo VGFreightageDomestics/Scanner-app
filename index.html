@@ -117,8 +117,20 @@
             <button class="btn btn-secondary mb-3" onclick="closeScanner()"><i class="fas fa-arrow-left"></i> Back</button>
             <h4 class="fw-bold mb-3">Scan Waybill</h4>
             
-            <div id="reader"></div>
-            <p class="text-center text-muted small">Point camera at QR Code</p>
+            <div class="d-grid gap-2 mb-2">
+  <button id="btnCamStart" class="btn btn-primary btn-lg" onclick="requestCamAndStart()">
+    <i class="fas fa-camera me-2"></i> Enable Camera / Start Scan
+  </button>
+  <button id="btnCamStop" class="btn btn-outline-danger" onclick="stopScan()" style="display:none;">
+    <i class="fas fa-stop me-2"></i> Stop Camera
+  </button>
+</div>
+
+<div id="camMsg" class="small text-danger mb-2"></div>
+
+<div id="reader"></div>
+<p class="text-center text-muted small">Point camera at QR Code</p>
+
         </div>
 
         <!-- 4. TRACKER SECTION -->
@@ -209,43 +221,157 @@
         });
 
         // NAVIGATION
-        window.openScanner = () => {
-            document.getElementById('tabMenu').classList.add('hidden');
-            document.getElementById('tabScanner').classList.remove('hidden');
-            startScan();
-        };
-        window.closeScanner = () => {
-            document.getElementById('tabMenu').classList.remove('hidden');
-            document.getElementById('tabScanner').classList.add('hidden');
-            if(scanner) scanner.clear();
-        };
-        window.openTracker = () => {
-            document.getElementById('tabMenu').classList.add('hidden');
-            document.getElementById('tabTracker').classList.remove('hidden');
-        };
-        window.closeTracker = () => {
-            document.getElementById('tabMenu').classList.remove('hidden');
-            document.getElementById('tabTracker').classList.add('hidden');
-        };
+window.openScanner = () => {
+  document.getElementById('tabMenu').classList.add('hidden');
+  document.getElementById('tabScanner').classList.remove('hidden');
 
-        // SCANNER LOGIC
-        function startScan() {
-            scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
-            scanner.render(onScanSuccess);
-        }
+  // IMPORTANT: do NOT auto-start camera here.
+  // User must click the button to request permission.
+  document.getElementById('camMsg').textContent = '';
+};
 
-        function onScanSuccess(decodedText) {
-            scanner.pause();
-            document.getElementById('detectedCode').innerText = decodedText;
-            document.getElementById('overlay').style.display = 'block';
-            document.getElementById('actionSheet').classList.add('show');
-        }
+window.closeScanner = async () => {
+  document.getElementById('tabMenu').classList.remove('hidden');
+  document.getElementById('tabScanner').classList.add('hidden');
+  await stopScan();
+};
 
-        window.closeSheet = () => {
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('actionSheet').classList.remove('show');
-            if(scanner) scanner.resume();
-        };
+// CAMERA PERMISSION + START
+window.requestCamAndStart = async () => {
+  const msg = document.getElementById('camMsg');
+  msg.textContent = '';
+
+  try {
+    // Force permission prompt via user click
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" } },
+      audio: false
+    });
+
+    // Stop this “probe” stream immediately (scanner will open its own)
+    stream.getTracks().forEach(t => t.stop());
+
+    await startScan();
+  } catch (e) {
+    // Common errors: NotAllowedError, NotFoundError, NotReadableError
+    const name = e?.name || 'CameraError';
+    let hint = '';
+
+    if (name === 'NotAllowedError' || name === 'SecurityError') {
+      hint = 'Camera permission denied. Please allow camera in Site Settings.';
+    } else if (name === 'NotFoundError') {
+      hint = 'No camera found on this device.';
+    } else if (name === 'NotReadableError') {
+      hint = 'Camera is in use by another app. Close other apps using the camera.';
+    } else {
+      hint = 'Camera blocked. If you opened this inside Facebook/Messenger, try opening in Chrome.';
+    }
+
+    msg.textContent = `${hint} (${name})`;
+    console.error(e);
+  }
+};
+
+async function startScan(){
+  const msg = document.getElementById('camMsg');
+  msg.textContent = '';
+
+  // Clean previous instance
+  await stopScan();
+
+  // Use Html5Qrcode (more control than Html5QrcodeScanner)
+  const { Html5Qrcode } = window;
+  if (!Html5Qrcode) {
+    msg.textContent = 'Scanner library not loaded. Check internet/ad-block.';
+    return;
+  }
+
+  const qr = new Html5Qrcode("reader");
+  scanner = qr;
+
+  document.getElementById('btnCamStart').style.display = 'none';
+  document.getElementById('btnCamStop').style.display = 'block';
+
+  // Try back camera first
+  let camId = null;
+  try {
+    const cams = await Html5Qrcode.getCameras();
+    if (cams && cams.length) {
+      // Choose the last camera often = back camera on many phones
+      camId = cams[cams.length - 1].id;
+    }
+  } catch(e) {
+    // Ignore, will fallback to constraints
+  }
+
+  const config = { fps: 10, qrbox: 250, disableFlip: true };
+
+  try {
+    if (camId) {
+      await qr.start(
+        camId,
+        config,
+        (decodedText) => onScanSuccess(decodedText),
+        () => {} // ignore scan failure
+      );
+    } else {
+      // Fallback: constraints
+      await qr.start(
+        { facingMode: { ideal: "environment" } },
+        config,
+        (decodedText) => onScanSuccess(decodedText),
+        () => {}
+      );
+    }
+  } catch (e) {
+    const name = e?.name || 'StartError';
+    msg.textContent = `Unable to start camera. Try Chrome, HTTPS, and allow permission. (${name})`;
+    console.error(e);
+
+    document.getElementById('btnCamStart').style.display = 'block';
+    document.getElementById('btnCamStop').style.display = 'none';
+  }
+}
+
+window.stopScan = async () => {
+  if(scanner){
+    try{
+      // Html5Qrcode stop/clear
+      await scanner.stop();
+    }catch(e){}
+    try{
+      await scanner.clear();
+    }catch(e){}
+    scanner = null;
+  }
+  const msg = document.getElementById('camMsg');
+  if (msg) msg.textContent = '';
+
+  const startBtn = document.getElementById('btnCamStart');
+  const stopBtn  = document.getElementById('btnCamStop');
+  if (startBtn) startBtn.style.display = 'block';
+  if (stopBtn) stopBtn.style.display = 'none';
+};
+
+// Update onScanSuccess for Html5Qrcode (no pause/resume)
+function onScanSuccess(decodedText){
+  // Prevent rapid double trigger
+  if(window.__lastScan === decodedText && (Date.now() - (window.__lastScanAt||0)) < 1500) return;
+  window.__lastScan = decodedText;
+  window.__lastScanAt = Date.now();
+
+  document.getElementById('detectedCode').innerText = decodedText;
+
+  // show sheet
+  document.getElementById('locCustom').value = '';
+  document.getElementById('destCustom').value = '';
+  document.getElementById('locCustom').classList.add('hidden');
+  document.getElementById('destCustom').classList.add('hidden');
+
+  document.getElementById('overlay').style.display = 'block';
+  document.getElementById('actionSheet').classList.add('show');
+}
+
 
         // UPDATE LOGIC
         window.checkCustom = () => {
@@ -351,4 +477,5 @@
         };
     </script>
 </body>
+
 </html>
