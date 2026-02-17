@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>VG Cargo Scanner</title>
 
-  <meta name="theme-color" content="#001f60">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#001f60" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet" />
 
   <style>
     body { font-family: 'Roboto', sans-serif; background-color: #f0f2f5; user-select: none; }
@@ -36,31 +36,43 @@
     .menu-icon{ font-size:2.5rem; color:#001f60; margin-bottom:10px; }
     .menu-text{ font-weight:700; color:#333; font-size:1rem; }
 
-    #reader{ width:100%; border-radius:10px; overflow:hidden; margin-bottom:20px; min-height: 280px; background:#0b1220; }
+    .hidden{ display:none !important; }
+    .page-section{ padding-bottom: 60px; }
 
-    .action-sheet{
-      background:#fff; border-radius:20px 20px 0 0; padding:25px;
-      position:fixed; bottom:0; left:0; right:0; z-index:2000;
-      box-shadow:0 -5px 20px rgba(0,0,0,.1);
-      transform:translateY(110%); transition:.3s;
-      max-height:80vh; overflow:auto;
+    /* Camera box */
+    #reader{
+      width:100%;
+      border-radius:12px;
+      overflow:hidden;
+      min-height: 280px;
+      background:#0b1220;
+      box-shadow: 0 10px 24px rgba(0,0,0,.12);
     }
-    .action-sheet.show{ transform:translateY(0); }
 
-    .overlay{
-      position:fixed; top:0; left:0; width:100%; height:100%;
-      background:rgba(0,0,0,.5); z-index:1500; display:none;
-    }
+    .mini-note{ font-size:.85rem; color:#6c757d; }
 
     .btn-update{
-      background:#00c853; color:#fff; font-weight:bold;
-      padding:15px; border-radius:50px; width:100%; border:none;
-      font-size:1.1rem; box-shadow:0 5px 15px rgba(0,200,83,.3);
+      background:#00c853; color:#fff; font-weight:800;
+      padding:14px; border-radius:50px; width:100%; border:none;
+      font-size:1.05rem; box-shadow:0 8px 20px rgba(0,200,83,.28);
+    }
+    .btn-update:disabled{ opacity:.7; }
+
+    .card-soft{
+      border:none;
+      border-radius:16px;
+      box-shadow:0 10px 24px rgba(0,0,0,.08);
     }
 
-    .hidden{ display:none !important; }
-    .page-section{ padding-bottom:80px; }
-    .mini-note{ font-size:.8rem; color:#6c757d; margin-top:6px; }
+    .code-pill{
+      font-weight:900;
+      letter-spacing:.5px;
+      padding:.5rem .75rem;
+      border-radius:12px;
+      background:#eef3ff;
+      color:#001f60;
+      word-break: break-all;
+    }
   </style>
 </head>
 <body>
@@ -73,8 +85,8 @@
       <p class="opacity-75">Staff Scanner App</p>
     </div>
     <div class="w-100 mt-4">
-      <input type="email" id="email" class="form-control form-control-lg mb-3" placeholder="Staff Email">
-      <input type="password" id="pass" class="form-control form-control-lg mb-4" placeholder="Password">
+      <input type="email" id="email" class="form-control form-control-lg mb-3" placeholder="Staff Email" />
+      <input type="password" id="pass" class="form-control form-control-lg mb-4" placeholder="Password" />
       <button class="btn btn-warning w-100 btn-lg fw-bold" onclick="login()">SECURE LOGIN</button>
     </div>
   </div>
@@ -106,7 +118,7 @@
     <!-- SCANNER -->
     <div id="tabScanner" class="page-section hidden p-3">
       <button class="btn btn-secondary mb-3" onclick="closeScanner()"><i class="fas fa-arrow-left"></i> Back</button>
-      <h4 class="fw-bold mb-3">Scan Waybill</h4>
+      <h4 class="fw-bold mb-2">Scan Waybill</h4>
 
       <div class="d-grid gap-2 mb-2">
         <button id="btnCamStart" class="btn btn-primary btn-lg" onclick="requestCamAndStart()">
@@ -120,7 +132,57 @@
       <div id="camMsg" class="small text-danger mb-2"></div>
 
       <div id="reader"></div>
-      <p class="text-center text-muted small">Tip: If opened inside Facebook/Messenger browser, tap menu → <b>Open in Chrome</b>.</p>
+      <p class="text-center text-muted mini-note mt-2">
+        Tip: If opened inside Facebook/Messenger browser, tap menu → <b>Open in Chrome</b>.
+      </p>
+
+      <!-- ALWAYS VISIBLE FORM (Ito na yung hinahanap mo) -->
+      <div class="card card-soft mt-3 p-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="fw-bold">Scan Details</div>
+          <div class="mini-note"><i class="fa-solid fa-circle-info me-1"></i> Dropdowns always visible</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="fw-bold small mb-1">DETECTED WAYBILL</label>
+          <div id="detectedCode" class="code-pill">— scan a QR first —</div>
+          <div class="mini-note mt-1">Kapag na-scan, automatic papasok dito.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="fw-bold small">STATUS</label>
+          <select id="newStatus" class="form-select form-select-lg">
+            <option value="PICKED_UP">Picked Up</option>
+            <option value="DEPARTED_ORIGIN">Departed Origin</option>
+            <option value="IN_TRANSIT">In Transit</option>
+            <option value="ARRIVED_DESTINATION">Arrived Destination</option>
+            <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
+            <option value="DELIVERED">Delivered</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="fw-bold small">LOCATION</label>
+          <select id="locSelect" class="form-select form-select-lg" onchange="checkCustomLoc()">
+            <option disabled selected>Loading hubs...</option>
+          </select>
+          <input id="locCustom" type="text" class="form-control mt-2 hidden" placeholder="Enter Custom Location" />
+        </div>
+
+        <div class="mb-3">
+          <label class="fw-bold small">DESTINATION</label>
+          <select id="destSelect" class="form-select form-select-lg" onchange="checkCustomDest()">
+            <option disabled selected>Loading destinations...</option>
+          </select>
+          <input id="destCustom" type="text" class="form-control mt-2 hidden" placeholder="Enter New Destination (City/Area)" />
+        </div>
+
+        <button class="btn-update" id="btnUpdate" onclick="submitUpdate()">
+          UPDATE STATUS
+        </button>
+
+        <div id="saveMsg" class="mini-note mt-2"></div>
+      </div>
     </div>
 
     <!-- TRACKER -->
@@ -129,53 +191,12 @@
       <h4 class="fw-bold mb-3">Track Shipment</h4>
 
       <div class="input-group mb-3">
-        <input type="text" id="trackInput" class="form-control form-control-lg" placeholder="VG-XXXXXX">
+        <input type="text" id="trackInput" class="form-control form-control-lg" placeholder="VG-XXXXXX" />
         <button class="btn btn-primary" onclick="trackItem()">SEARCH</button>
       </div>
+
       <div id="trackResult"></div>
     </div>
-  </div>
-
-  <!-- UPDATE SHEET -->
-  <div class="overlay" id="overlay" onclick="closeSheet()"></div>
-  <div class="action-sheet" id="actionSheet">
-    <div class="text-center mb-3">
-      <div style="width:50px; height:5px; background:#ddd; margin:0 auto; border-radius:10px;"></div>
-    </div>
-
-    <h3 class="fw-bold text-primary" id="detectedCode">...</h3>
-    <p class="text-muted small mb-3">Select status, location, and destination</p>
-
-    <div class="mb-3">
-      <label class="fw-bold small">STATUS</label>
-      <select id="newStatus" class="form-select form-select-lg">
-        <option value="PICKED_UP">Picked Up</option>
-        <option value="DEPARTED_ORIGIN">Departed Origin</option>
-        <option value="IN_TRANSIT">In Transit</option>
-        <option value="ARRIVED_DESTINATION">Arrived Destination</option>
-        <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
-        <option value="DELIVERED">Delivered</option>
-      </select>
-    </div>
-
-    <div class="mb-3">
-      <label class="fw-bold small">LOCATION</label>
-      <select id="locSelect" class="form-select form-select-lg" onchange="checkCustomLoc()">
-        <option disabled selected>Loading hubs...</option>
-      </select>
-      <input type="text" id="locCustom" class="form-control mt-2 hidden" placeholder="Enter Custom Location">
-    </div>
-
-    <div class="mb-4">
-      <label class="fw-bold small">DESTINATION</label>
-      <select id="destSelect" class="form-select form-select-lg" onchange="checkCustomDest()">
-        <option disabled selected>Loading destinations...</option>
-      </select>
-      <input type="text" id="destCustom" class="form-control mt-2 hidden" placeholder="Enter New Destination (City/Area)">
-      <div class="mini-note">Destination list auto-updates when you add new.</div>
-    </div>
-
-    <button class="btn-update" onclick="submitUpdate()">UPDATE STATUS</button>
   </div>
 
   <!-- LIB -->
@@ -186,6 +207,7 @@
     import { getFirestore, doc, getDoc, setDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCrDEUr1O5krXFHEB2hafLXuEumEcoSTxM",
       authDomain: "vg-cargo-system-3.firebaseapp.com",
@@ -201,218 +223,211 @@
 
     let scanner = null; // Html5Qrcode instance
 
-    // AUTH
+    // ===== AUTH =====
     window.login = async () => {
-      try{
-        await signInWithEmailAndPassword(auth,
-          document.getElementById('email').value,
-          document.getElementById('pass').value
+      try {
+        await signInWithEmailAndPassword(
+          auth,
+          document.getElementById("email").value,
+          document.getElementById("pass").value
         );
-      }catch(e){
+      } catch (e) {
         alert("Login failed: " + e.message);
       }
     };
+
     window.logout = () => signOut(auth);
 
     onAuthStateChanged(auth, (user) => {
-      if(user){
-        document.getElementById('viewLogin').classList.add('hidden');
-        document.getElementById('viewMain').classList.remove('hidden');
-        document.getElementById('userDisp').innerText = user.email.split('@')[0];
+      if (user) {
+        document.getElementById("viewLogin").classList.add("hidden");
+        document.getElementById("viewMain").classList.remove("hidden");
+        document.getElementById("userDisp").innerText = user.email.split("@")[0];
 
         loadLocations();
         loadDestinations();
-      }else{
-        document.getElementById('viewLogin').classList.remove('hidden');
-        document.getElementById('viewMain').classList.add('hidden');
+      } else {
+        document.getElementById("viewLogin").classList.remove("hidden");
+        document.getElementById("viewMain").classList.add("hidden");
       }
     });
 
-    // NAV
+    // ===== NAV =====
     window.openScanner = () => {
-      document.getElementById('tabMenu').classList.add('hidden');
-      document.getElementById('tabScanner').classList.remove('hidden');
-      document.getElementById('camMsg').textContent = '';
-      // DO NOT auto-start camera (permission must be user-gesture)
+      document.getElementById("tabMenu").classList.add("hidden");
+      document.getElementById("tabScanner").classList.remove("hidden");
+      document.getElementById("camMsg").textContent = "";
+      document.getElementById("saveMsg").textContent = "";
     };
 
     window.closeScanner = async () => {
-      document.getElementById('tabMenu').classList.remove('hidden');
-      document.getElementById('tabScanner').classList.add('hidden');
+      document.getElementById("tabMenu").classList.remove("hidden");
+      document.getElementById("tabScanner").classList.add("hidden");
       await stopScan();
-      closeSheet();
     };
 
     window.openTracker = () => {
-      document.getElementById('tabMenu').classList.add('hidden');
-      document.getElementById('tabTracker').classList.remove('hidden');
+      document.getElementById("tabMenu").classList.add("hidden");
+      document.getElementById("tabTracker").classList.remove("hidden");
     };
 
     window.closeTracker = () => {
-      document.getElementById('tabMenu').classList.remove('hidden');
-      document.getElementById('tabTracker').classList.add('hidden');
+      document.getElementById("tabMenu").classList.remove("hidden");
+      document.getElementById("tabTracker").classList.add("hidden");
     };
 
-    // SHEET
-    window.closeSheet = () => {
-      document.getElementById('overlay').style.display = 'none';
-      document.getElementById('actionSheet').classList.remove('show');
-    };
-
-    // CUSTOM toggle
+    // ===== CUSTOM TOGGLES =====
     window.checkCustomLoc = () => {
-      const v = document.getElementById('locSelect').value;
-      document.getElementById('locCustom').classList.toggle('hidden', v !== '__OTHER__');
+      const v = document.getElementById("locSelect").value;
+      document.getElementById("locCustom").classList.toggle("hidden", v !== "__OTHER__");
     };
+
     window.checkCustomDest = () => {
-      const v = document.getElementById('destSelect').value;
-      document.getElementById('destCustom').classList.toggle('hidden', v !== '__OTHER__');
+      const v = document.getElementById("destSelect").value;
+      document.getElementById("destCustom").classList.toggle("hidden", v !== "__OTHER__");
     };
 
-    // CAMERA PERMISSION + START
+    // ===== CAMERA PERMISSION + START =====
     window.requestCamAndStart = async () => {
-      const msg = document.getElementById('camMsg');
-      msg.textContent = '';
+      const msg = document.getElementById("camMsg");
+      msg.textContent = "";
 
-      try{
-        // permission prompt via user click
+      try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: { ideal: "environment" } },
           audio: false
         });
-        stream.getTracks().forEach(t => t.stop());
-        await startScan();
-      }catch(e){
-        const name = e?.name || 'CameraError';
-        let hint = '';
+        stream.getTracks().forEach((t) => t.stop());
 
-        if(name === 'NotAllowedError' || name === 'SecurityError'){
-          hint = 'Camera permission denied. Allow camera in Site Settings.';
-        }else if(name === 'NotFoundError'){
-          hint = 'No camera found on this device.';
-        }else if(name === 'NotReadableError'){
-          hint = 'Camera is in use by another app. Close other apps using the camera.';
-        }else{
-          hint = 'Camera blocked. If opened in Facebook/Messenger, open in Chrome.';
+        await startScan();
+      } catch (e) {
+        const name = e?.name || "CameraError";
+        let hint = "";
+
+        if (name === "NotAllowedError" || name === "SecurityError") {
+          hint = "Camera permission denied. Allow camera in Site Settings.";
+        } else if (name === "NotFoundError") {
+          hint = "No camera found on this device.";
+        } else if (name === "NotReadableError") {
+          hint = "Camera is in use by another app. Close other apps using the camera.";
+        } else {
+          hint = "Camera blocked. If opened in Facebook/Messenger, open in Chrome.";
         }
+
         msg.textContent = `${hint} (${name})`;
         console.error(e);
       }
     };
 
-    async function startScan(){
-      const msg = document.getElementById('camMsg');
-      msg.textContent = '';
+    async function startScan() {
+      const msg = document.getElementById("camMsg");
+      msg.textContent = "";
 
       await stopScan();
 
       const { Html5Qrcode } = window;
-      if(!Html5Qrcode){
-        msg.textContent = 'Scanner library not loaded. Check internet/ad-block.';
+      if (!Html5Qrcode) {
+        msg.textContent = "Scanner library not loaded. Check internet/ad-block.";
         return;
       }
 
       const qr = new Html5Qrcode("reader");
       scanner = qr;
 
-      document.getElementById('btnCamStart').style.display = 'none';
-      document.getElementById('btnCamStop').style.display = 'block';
+      document.getElementById("btnCamStart").style.display = "none";
+      document.getElementById("btnCamStop").style.display = "block";
 
       let camId = null;
-      try{
+      try {
         const cams = await Html5Qrcode.getCameras();
-        if(cams && cams.length){
+        if (cams && cams.length) {
           camId = cams[cams.length - 1].id; // usually back cam
         }
-      }catch(e){}
+      } catch (e) {}
 
       const config = { fps: 10, qrbox: 250, disableFlip: true };
 
-      try{
-        if(camId){
-          await qr.start(camId, config, (txt)=>onScanSuccess(txt), ()=>{});
-        }else{
-          await qr.start({ facingMode: { ideal: "environment" } }, config, (txt)=>onScanSuccess(txt), ()=>{});
+      try {
+        if (camId) {
+          await qr.start(camId, config, (txt) => onScanSuccess(txt), () => {});
+        } else {
+          await qr.start({ facingMode: { ideal: "environment" } }, config, (txt) => onScanSuccess(txt), () => {});
         }
-      }catch(e){
-        const name = e?.name || 'StartError';
+      } catch (e) {
+        const name = e?.name || "StartError";
         msg.textContent = `Unable to start camera. Use HTTPS/Chrome and allow permission. (${name})`;
         console.error(e);
 
-        document.getElementById('btnCamStart').style.display = 'block';
-        document.getElementById('btnCamStop').style.display = 'none';
+        document.getElementById("btnCamStart").style.display = "block";
+        document.getElementById("btnCamStop").style.display = "none";
       }
     }
 
     window.stopScan = async () => {
-      if(scanner){
-        try{ await scanner.stop(); }catch(e){}
-        try{ await scanner.clear(); }catch(e){}
+      if (scanner) {
+        try { await scanner.stop(); } catch (e) {}
+        try { await scanner.clear(); } catch (e) {}
         scanner = null;
       }
-      const msg = document.getElementById('camMsg');
-      if(msg) msg.textContent = '';
+      const msg = document.getElementById("camMsg");
+      if (msg) msg.textContent = "";
 
-      const startBtn = document.getElementById('btnCamStart');
-      const stopBtn  = document.getElementById('btnCamStop');
-      if(startBtn) startBtn.style.display = 'block';
-      if(stopBtn) stopBtn.style.display = 'none';
+      const startBtn = document.getElementById("btnCamStart");
+      const stopBtn = document.getElementById("btnCamStop");
+      if (startBtn) startBtn.style.display = "block";
+      if (stopBtn) stopBtn.style.display = "none";
     };
 
-    function onScanSuccess(decodedText){
-      const txt = String(decodedText || '').trim();
-      if(!txt) return;
+    function onScanSuccess(decodedText) {
+      const txt = String(decodedText || "").trim();
+      if (!txt) return;
 
-      // anti-double trigger
-      if(window.__lastScan === txt && (Date.now() - (window.__lastScanAt||0)) < 1200) return;
+      // anti-double scan trigger
+      if (window.__lastScan === txt && (Date.now() - (window.__lastScanAt || 0)) < 1200) return;
       window.__lastScan = txt;
       window.__lastScanAt = Date.now();
 
-      document.getElementById('detectedCode').innerText = txt;
+      document.getElementById("detectedCode").innerText = txt;
+      document.getElementById("saveMsg").textContent = "Waybill captured. Choose status/location/destination then tap UPDATE.";
 
-      // reset custom fields
-      document.getElementById('locCustom').value = '';
-      document.getElementById('destCustom').value = '';
-      document.getElementById('locCustom').classList.add('hidden');
-      document.getElementById('destCustom').classList.add('hidden');
-
-      document.getElementById('overlay').style.display = 'block';
-      document.getElementById('actionSheet').classList.add('show');
+      // optional: vibrate if supported
+      try { navigator.vibrate && navigator.vibrate(80); } catch(e){}
     }
 
-    // UPDATE
+    // ===== SAVE / UPDATE =====
     window.submitUpdate = async () => {
-      const wb = (document.getElementById('detectedCode').innerText || '').trim();
-      const status = document.getElementById('newStatus').value;
+      const wb = (document.getElementById("detectedCode").innerText || "").trim();
+      const status = document.getElementById("newStatus").value;
 
-      let loc = document.getElementById('locSelect').value;
-      let dest = document.getElementById('destSelect').value;
+      let loc = document.getElementById("locSelect").value;
+      let dest = document.getElementById("destSelect").value;
 
       let isCustomLoc = false;
       let isCustomDest = false;
 
-      if(loc === '__OTHER__'){
-        loc = (document.getElementById('locCustom').value || '').trim();
+      if (loc === "__OTHER__") {
+        loc = (document.getElementById("locCustom").value || "").trim();
         isCustomLoc = true;
       }
-      if(dest === '__OTHER__'){
-        dest = (document.getElementById('destCustom').value || '').trim();
+      if (dest === "__OTHER__") {
+        dest = (document.getElementById("destCustom").value || "").trim();
         isCustomDest = true;
       }
 
-      if(!wb) return alert("No waybill detected.");
-      if(!status) return alert("Select status.");
-      if(!loc) return alert("Select location.");
-      if(!dest) return alert("Select destination.");
+      if (!wb || wb.includes("scan a QR first")) return alert("Scan a waybill first.");
+      if (!status) return alert("Select status.");
+      if (!loc) return alert("Select location.");
+      if (!dest) return alert("Select destination.");
 
-      const btn = document.querySelector('.btn-update');
-      btn.innerText = "UPDATING...";
+      const btn = document.getElementById("btnUpdate");
+      const saveMsg = document.getElementById("saveMsg");
       btn.disabled = true;
+      btn.textContent = "SAVING...";
+      saveMsg.textContent = "";
 
-      try{
+      try {
         const nowStr = new Date().toLocaleString();
 
-        // SAFE: creates doc if missing, merges if existing
         await setDoc(doc(db, "parcels", wb), {
           waybill: wb,
           currentStatus: status,
@@ -420,71 +435,73 @@
           currentDestination: dest,
           updatedAt: nowStr,
           history: arrayUnion({
-            status, location: loc, destination: dest,
+            status,
+            location: loc,
+            destination: dest,
             time: nowStr,
-            user: auth.currentUser?.email || ''
+            user: auth.currentUser?.email || ""
           })
         }, { merge: true });
 
-        // Save custom lists
-        if(isCustomLoc){
-          await setDoc(doc(db, "settings", "locations"), { list: arrayUnion(loc) }, { merge:true });
+        if (isCustomLoc) {
+          await setDoc(doc(db, "settings", "locations"), { list: arrayUnion(loc) }, { merge: true });
         }
-        if(isCustomDest){
-          await setDoc(doc(db, "settings", "destinations"), { list: arrayUnion(dest) }, { merge:true });
+        if (isCustomDest) {
+          await setDoc(doc(db, "settings", "destinations"), { list: arrayUnion(dest) }, { merge: true });
         }
 
-        alert("Success!");
-        closeSheet();
-      }catch(e){
-        alert("Error: " + e.message);
+        saveMsg.textContent = "✅ Saved successfully!";
+      } catch (e) {
         console.error(e);
+        alert("Error: " + e.message);
       }
 
-      btn.innerText = "UPDATE STATUS";
       btn.disabled = false;
+      btn.textContent = "UPDATE STATUS";
     };
 
-    // LOAD LOCATIONS
-    function loadLocations(){
+    // ===== LOAD DROPDOWNS =====
+    function loadLocations() {
       onSnapshot(doc(db, "settings", "locations"), (s) => {
-        const sel = document.getElementById('locSelect');
+        const sel = document.getElementById("locSelect");
         let list = ["MNL HUB", "CEB HUB", "DVO HUB", "Rider"];
-        if(s.exists() && Array.isArray(s.data().list)) list = s.data().list;
+        if (s.exists() && Array.isArray(s.data().list)) list = s.data().list;
 
-        const clean = (list||[]).map(x=>String(x||'').trim()).filter(Boolean);
-        let opts = clean.sort((a,b)=>a.localeCompare(b))
-          .map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+        const clean = (list || []).map(x => String(x || "").trim()).filter(Boolean);
+        let opts = clean.sort((a, b) => a.localeCompare(b))
+          .map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join("");
+
         opts += `<option value="__OTHER__">+ New Location</option>`;
         sel.innerHTML = opts || `<option value="__OTHER__">+ New Location</option>`;
       });
     }
 
-    // LOAD DESTINATIONS
-    function loadDestinations(){
+    function loadDestinations() {
       onSnapshot(doc(db, "settings", "destinations"), (s) => {
-        const sel = document.getElementById('destSelect');
+        const sel = document.getElementById("destSelect");
         let list = ["MANILA", "CEBU", "DAVAO", "ILOILO", "BACOLOD"];
-        if(s.exists() && Array.isArray(s.data().list)) list = s.data().list;
+        if (s.exists() && Array.isArray(s.data().list)) list = s.data().list;
 
-        const clean = (list||[]).map(x=>String(x||'').trim()).filter(Boolean);
-        let opts = clean.sort((a,b)=>a.localeCompare(b))
-          .map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+        const clean = (list || []).map(x => String(x || "").trim()).filter(Boolean);
+        let opts = clean.sort((a, b) => a.localeCompare(b))
+          .map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join("");
+
         opts += `<option value="__OTHER__">+ New Destination</option>`;
         sel.innerHTML = opts || `<option value="__OTHER__">+ New Destination</option>`;
       });
     }
 
-    // TRACK
+    // ===== TRACK =====
     window.trackItem = async () => {
-      const wb = (document.getElementById('trackInput').value || '').trim().toUpperCase();
-      const res = document.getElementById('trackResult');
-      if(!wb){ res.innerHTML = "<div class='alert alert-warning'>Enter waybill.</div>"; return; }
+      const wb = (document.getElementById("trackInput").value || "").trim().toUpperCase();
+      const res = document.getElementById("trackResult");
+
+      if (!wb) { res.innerHTML = "<div class='alert alert-warning'>Enter waybill.</div>"; return; }
 
       res.innerHTML = "Searching...";
-      try{
+      try {
         const d = await getDoc(doc(db, "parcels", wb));
-        if(!d.exists()){
+        if (!d.exists()) {
           res.innerHTML = "<div class='alert alert-danger'>Not found</div>";
           return;
         }
@@ -495,38 +512,38 @@
 
         const hist = histArr.map(h => `
           <div class="border-start border-3 border-primary ps-3 mb-3">
-            <div class="fw-bold">${esc(h.status || '')}</div>
-            <div class="small text-muted">${esc(h.location || '')}${h.destination ? ' • ' + esc(h.destination) : ''}</div>
-            <div style="font-size:0.7rem">${esc(h.time || '')}</div>
+            <div class="fw-bold">${esc(h.status || "")}</div>
+            <div class="small text-muted">${esc(h.location || "")}${h.destination ? " • " + esc(h.destination) : ""}</div>
+            <div style="font-size:0.7rem">${esc(h.time || "")}</div>
           </div>
-        `).join('') || `<div class="text-muted small">No history yet.</div>`;
+        `).join("") || `<div class="text-muted small">No history yet.</div>`;
 
         res.innerHTML = `
           <div class="card p-3 shadow-sm mt-3">
             <h3 class="fw-bold text-primary">${esc(data.waybill || wb)}</h3>
-            <div class="badge bg-warning text-dark mb-2">${esc(data.currentStatus || '')}</div>
+            <div class="badge bg-warning text-dark mb-2">${esc(data.currentStatus || "")}</div>
             <div class="small text-muted mb-3">
-              <div><strong>Location:</strong> ${esc(data.currentLocation || '-')}</div>
-              <div><strong>Destination:</strong> ${esc(data.currentDestination || '-')}</div>
+              <div><strong>Location:</strong> ${esc(data.currentLocation || "-")}</div>
+              <div><strong>Destination:</strong> ${esc(data.currentDestination || "-")}</div>
             </div>
             <hr>
             <h6 class="fw-bold">History</h6>
             ${hist}
           </div>
         `;
-      }catch(e){
+      } catch (e) {
         console.error(e);
         res.innerHTML = "<div class='alert alert-danger'>Error loading record</div>";
       }
     };
 
-    function esc(s){
-      return String(s||'')
-        .replaceAll('&','&amp;')
-        .replaceAll('<','&lt;')
-        .replaceAll('>','&gt;')
-        .replaceAll('"','&quot;')
-        .replaceAll("'","&#039;");
+    function esc(s) {
+      return String(s || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
   </script>
 </body>
