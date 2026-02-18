@@ -4,7 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>VG Cargo Scanner</title>
-
+<!-- PWA Manifest & Worker -->
+    <link rel="manifest" href="manifest.json">
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+      }
+    </script>
   <meta name="theme-color" content="#001f60" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
 
@@ -548,3 +554,4 @@
   </script>
 </body>
 </html>
+
