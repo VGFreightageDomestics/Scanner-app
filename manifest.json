@@ -1,0 +1,18 @@
+{
+  "name": "VG Staff Scanner",
+  "short_name": "VG Scan",
+  "start_url": "/Scanner-app/",
+  "display": "standalone",
+  "background_color": "#001f60",
+  "theme_color": "#001f60",
+  "orientation": "portrait",
+  "scope": "/Scanner-app/",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
